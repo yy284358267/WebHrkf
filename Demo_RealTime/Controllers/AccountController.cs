@@ -19,6 +19,7 @@ namespace Demo_RealTime.Controllers
 
         public AccountController()
         {
+            //王云鹏提交
         }
 
         public AccountController(ApplicationUserManager userManager, ApplicationSignInManager signInManager )
