@@ -1,0 +1,175 @@
+﻿
+
+@{ 
+    string fromUser = Request["fromUser"];
+    string toUser = Request["toUser"];
+}
+ 
+<style type="text/css">
+    *{     
+        padding:0px;
+        margin:0px;   
+    }
+   body{
+
+   }
+    .topc {
+        width: 1000px;
+        height:76px;
+        background-color: #5BA4ED;
+        color:#ffffff;
+        font-family:"黑体";
+        font-size:20px;
+        line-height:76px;
+        
+    }
+
+    .content {
+        width:1000px;
+        height:700px;
+    }
+
+    .left-content {
+        /*background-color: #1671ef;*/
+        float:left;
+        width:170px;
+        height: 700px;
+    }
+
+    .content-c {
+        width: 660px;
+        float:left;
+        height:700px;
+    }
+
+    .right-content {    
+        height:700px;
+        width:170px;
+        float:right;
+        /*background-color: #1671ef;*/
+    }
+    #discussion{
+        width: 660px;
+        /*position:absolute;*/
+        height:425px;
+        overflow:auto; 
+        overflow:yes; 
+        /*overflow-y :auto;*/
+        overflow-y :yes;
+    }
+    .left-to-msg{
+        text-align:left;
+        list-style:none;
+    }
+    .right-from-msg{
+        text-align:right;
+        list-style:none;
+    }
+    .mess{
+        border:1px;
+        border-color:#78B8F7;
+        
+    }
+}
+</style>
+<head>
+    <meta charset="UTF-8">
+   
+
+    <script src="Scripts/jquery-1.10.2.js"></script>
+    @*<script src="kindeditor-4.0/kindeditor-min.js"></script>*@
+    <script src="~/kindeditor-4.0/kindeditor.js"></script>
+
+    <script language="javascript" type="text/javascript">
+             KindEditor.ready(function (K) {
+                window.editor = K.create('#NewsContent', {
+                width: 660  ,
+                height: 248,
+                uploadJson: '@Url.Content("/kindeditor-4.0/asp.net/upload_json.ashx")',
+                fileManagerJson: '@Url.Content("/kindeditor-4.0/asp.net/file_manager_json.ashx")',
+                allowFileManager: true,
+                afterCreate: function () {
+                    var self = this;
+                    K.ctrl(document, 13, function () {
+                        self.sync();
+                        //K('form[name=example]')[0].submit();
+                    });
+                    K.ctrl(self.edit.doc, 13, function () {
+                        self.sync();
+                        // K('form[name=example]')[0].submit();
+                    });
+                    K.ctrl(this.edit.iframe.get(0).contentWindow.document, 13, function () {
+                        $("#sendmessage").click();
+                    });
+
+                },
+                resizeType: 0,
+                
+                //afterBlur: function() {this.sync();}
+            });
+            // prettyPrint();
+        });
+       
+    </script>
+</head>
+<body>
+
+
+    @Html.Hidden("ToUser", "", new { id = "ToUser" })
+    
+    <div class="topc">
+        <div>
+            <img src="~/Content/3_141204104627_1.jpg" style="width:8%;height:100%" />&nbsp 当用户：@fromUser
+        </div>
+    </div>
+    <div class="content">
+        <div class="left-content"><img border="0" width="100%" height="100%"  src="http://www.kuaishang.com.cn/cusimg/ks_online_left.jpg" /></div>
+        <div class="content-c">
+            <div id="discussion"  >
+               
+            </div>
+            <div >
+                <textarea id="NewsContent"></textarea>
+                @*<input onkeydown='if(event.keyCode==13){cu.click()}'/>*@
+                <button id=sendmessage   style="float:right; width:67px;height:26px; background-color:#78B8F7; color:#F6F8FE;">发送</button>
+                
+            </div>
+        </div>
+        <div class="right-content">
+            <img border="0" width="100%" height="100%"  src="http://www.kuaishang.com.cn/cusimg/ks_online_right.jpg" />
+        </div>
+    </div>
+</body>
+   <script type="text/javascript">
+
+       $(function () {
+
+        // 声明一个代理引用该集线器 messageHub在MessageHub类自定义.
+        var chat = $.connection.messageHub;
+        // 开始连接.
+        $.connection.hub.start().done(function () {
+            //点击发送
+           
+            $('#sendmessage').click(function () {
+                message = editor.html();
+                editor.html("");
+                $('#discussion').scrollTop($('#discussion')[0].scrollHeight-100);
+                chat.server.send('aaa', "@ViewBag.User", message);
+                if ("@ViewBag.User"!="") {
+                    $('#discussion').append('<li class="right-from-msg">&nbsp;&nbsp;<span style=" border:1px;border-color:#78B8F7;background-color:#78B8F7;">' + message + '</span><strong>&nbsp我aaa</strong></li>');
+                }
+                
+            });
+        });
+
+            //创建集线器可以调用广播消息的功能 AAA在SendMsg推送
+            chat.client.AAA = function (name, message) {
+                $('#discussion').append('<li class="left-to-msg"><strong>来自' + name + '</strong>:&nbsp;&nbsp;<span>' + message + '</span></li>');
+                $('#discussion').scrollTop($('#discussion')[0].scrollHeight - 100);
+            };
+
+
+
+        });
+    </script>
+

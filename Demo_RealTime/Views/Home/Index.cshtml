@@ -1,0 +1,59 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+
+    String clientIpAddress = Request.UserHostAddress;
+}
+<div class="container"  style="text-align:center;">
+    单独聊天测试
+</div>
+ 
+<div class="">
+    <ul>
+        <li><a target="_blank" href="/Home/About?fromUser=aaa&toUser=bbb">我是用户a</a></li>
+     
+    </ul>
+</div>
+
+@*<div class="container">
+    <h4>第一步：接收人IP或接收人用户名</h4>
+    <input type="text" id="ObjUser" value="" /> 
+</div>
+
+<div class="container">
+    <h4>第二步：聊天</h4>
+    <ul id="discussion" style="padding:3px; border:1px solid #e2e2e2;"></ul>  
+    <input type="text" id="message" />
+    <input type="button" id="sendmessage" value="发送" /> 
+</div>
+
+<div>
+    <script type="text/javascript">
+        $(function () {
+            // 声明一个代理引用该集线器 messageHub在MessageHub类自定义.
+            var chat = $.connection.messageHub;
+
+            // 开始连接.
+            $.connection.hub.start().done(function () {
+
+                //点击发送
+                $('#sendmessage').click(function () {
+                    //var _nowUser = $.trim($("#NowUser").val());
+                    var _objUser =$("#ObjUser").val();
+                    var message = $("#message").val();
+                    alert(_objUser+"--"+message)
+                    chat.server.send(_objUser, message);
+                });
+
+            });
+
+            //创建集线器可以调用广播消息的功能 AAA在SendMsg推送
+            chat.client.AAA = function (name, message) {
+                alert(name + "--" + message)
+                var encodedName = $('<div />').text(name).html();
+                var encodedMsg = $('<div />').text(message).html(); 
+                $('#discussion').append('<li><strong>' + encodedName+ '</strong>:&nbsp;&nbsp;' + encodedMsg + '</li>');
+            };
+
+        });
+    </script>
+</div>*@

@@ -1,0 +1,39 @@
+﻿<!DOCTYPE HTML>
+<html lang="en-US">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ueditor demo</title>
+ 
+    <script src="Scripts/jquery-1.10.2.js"></script>
+    <script src="kindeditor-4.0/kindeditor-min.js"></script>
+
+    <script language="javascript" type="text/javascript">
+             KindEditor.ready(function (K) {
+            var editor1 = K.create('#NewsContent', {
+                width: 800,
+                height: 400,
+                uploadJson: "kindeditor-4.0/asp.net/upload_json.ashx",
+                fileManagerJson: "kindeditor-4.0/asp.net/file_manager_json.ashx",
+                allowFileManager: true,
+                afterCreate: function () {
+                    var self = this;
+                    K.ctrl(document, 13, function () {
+                        self.sync();
+                        //K('form[name=example]')[0].submit();
+                    });
+                    K.ctrl(self.edit.doc, 13, function () {
+                        self.sync();
+                        // K('form[name=example]')[0].submit();
+                    });
+                }
+            });
+            // prettyPrint();
+        });
+
+    </script>
+</head>
+<body>
+    <textarea cols="20" rows="70" id="NewsContent"></textarea>
+</body>
+</html>

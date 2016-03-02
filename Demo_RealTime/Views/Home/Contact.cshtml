@@ -1,0 +1,70 @@
+﻿@{
+    string fromUser = Request["fromUser"];
+    string toUser = Request["toUser"];
+}
+<style type="text/css">
+    .top{
+        width:100%;
+        background-color:#1671ef;
+    }
+    .content{
+
+        width:100%;
+    }
+    .left-content{
+       background-color:#1671ef;
+       float:left;
+       width:20%
+    }
+    .content-c{
+        width:60%;
+        float:left;
+    }
+    .right-content{
+        width:20%;
+        float:left;
+        background-color:#1671ef;
+    }
+</style>
+
+<div class="top">
+   <div style="float:left">当用户：@fromUser</div>
+</div>
+
+<div class="content">
+    <div class="left-content"></div>
+    <div class="content-c">
+        
+        <ul id="discussion" style="padding:3px; border:1px solid #e2e2e2;min-height:150px;"></ul>
+        <input type="text" id="message" />
+        <input type="button" id="sendmessage" value="发送" />
+    
+    </div>
+    <div class="right-content"></div>
+    
+    
+</div>
+
+<div>
+    <script type="text/javascript">
+        $(function () {
+            // 声明一个代理引用该集线器 messageHub在MessageHub类自定义.
+            var chat = $.connection.messageHub;
+            // 开始连接.
+            $.connection.hub.start().done(function () {
+                //点击发送
+                $('#sendmessage').click(function () {
+                    var message = $("#message").val();
+                    chat.server.send('@fromUser', '@toUser', message);
+                    $('#discussion').append('<li class="right-from-msg"><strong>我 @fromUser</strong>:&nbsp;&nbsp;<span>' + message + '</span></li>');
+                });
+            });
+
+            //创建集线器可以调用广播消息的功能 AAA在SendMsg推送
+            chat.client.AAA = function (name, message) {
+                $('#discussion').append('<li class="left-to-msg"><strong>来自 ' + name + '</strong>:&nbsp;&nbsp;<span>' + message + '</span></li>');
+            };
+
+        });
+    </script>
+</div>
