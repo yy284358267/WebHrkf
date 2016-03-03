@@ -72,7 +72,7 @@ namespace Demo_RealTime.Hubs
                             if (!str.Contains(fromUser))
                             {
 
-                                Clients.Client(users.usernameid).AA(fromUser);
+                                Clients.Client(users.usernameid).AddTree(fromUser);
                                 Clients.Client(visitor.visitorid).AAA(fromUser, "您好，客服" + fromUser + "为您服务");
                             }
 
@@ -214,13 +214,12 @@ namespace Demo_RealTime.Hubs
                 var url = HttpContext.Current.Request.UrlReferrer;
                 if (url != null && url.Query.Contains("&") == true)
                 {
-
                     string userName = "aaa";
                     if (string.IsNullOrEmpty(userName) == false)
-                    {   
+                    {
                         //判断用户是否登陆过
                         string selectUser = "select * from Visitor where visitor='aaa' and DateDiff(dd,convert(datetime,StartTime,105),getdate())=0";
-                        SqlDataReader dr=SqlHelper.GetReader(selectUser,System.Data.CommandType.Text);
+                        SqlDataReader dr = SqlHelper.GetReader(selectUser, System.Data.CommandType.Text);
                         while (dr.Read())
                         {
                             visitor = dr["visitor"].ToString();
@@ -228,7 +227,7 @@ namespace Demo_RealTime.Hubs
                         dr.Close();
                         if (string.IsNullOrEmpty(visitor))
                         {
-                            string sql = "insert Visitor select Visitor=@a,VisitorID=@b,card='游客',state='在线',StartTime='"+ DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")+ "',EndTime='',KFname=''";
+                            string sql = "insert Visitor select Visitor=@a,VisitorID=@b,card='游客',state='在线',StartTime='" + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") + "',EndTime='',KFname=''";
                             SqlParameter[] pa = {
                                                  new SqlParameter("@a","aaa"),
                                                   new SqlParameter("@b",connectionID)
@@ -238,20 +237,18 @@ namespace Demo_RealTime.Hubs
                         else
                         {
                             string sql = "update Visitor set VisitorID=@b,state='在线' where  visitor='aaa' and DateDiff(dd,convert(datetime,StartTime,105),getdate())=0";
-                            SqlParameter[] pa = {                                          
+                            SqlParameter[] pa = {
                                               new SqlParameter("@b",connectionID)
                               };
                             SqlHelper.ExeSql(sql, System.Data.CommandType.Text, pa);
                         }
                     }
-                       
-
                 }
                 else
                 {
                     string username = string.Empty;
                     string select = "select Top 1 username from users where state='在线' and card='客服'  order by count asc";
-                    SqlDataReader dr=SqlHelper.GetReader(select,System.Data.CommandType.Text);
+                    SqlDataReader dr = SqlHelper.GetReader(select, System.Data.CommandType.Text);
                     while (dr.Read())
                     {
                         username = dr["username"].ToString();
@@ -263,7 +260,7 @@ namespace Demo_RealTime.Hubs
                           new SqlParameter("@b",connectionID)
                     };
                     SqlHelper.ExeSql(sql, System.Data.CommandType.Text, pa);
-                    
+
                 }
                 //TODO:
                 //1、获取客服账号
@@ -280,6 +277,7 @@ namespace Demo_RealTime.Hubs
             string KF = string.Empty;
             string userid = string.Empty;
             var connectionID = Context.ConnectionId;
+            string card = string.Empty;
             if (stopCalled == true)
             {
                 Visitor visitor = new Visitor();
@@ -296,7 +294,7 @@ namespace Demo_RealTime.Hubs
                 //            //UserManager.RemoveUser(userName, connectionID);
                 //        {
                 //string SelectVisitor = "select card,visitorid from Visitor where Visitor='aaa' and DateDiff(dd,convert(datetime,StartTime,105),getdate())=0 ";
-                //SqlDataReader drd = SqlHelper.GetReader(SelectVisitor, System.Data.CommandType.Text);
+                //SqlDataReader d    rd = SqlHelper.GetReader(SelectVisitor, System.Data.CommandType.Text);
                 //while (drd.Read())
                 //{
                 //    visitor.visitorid = drd["visitorid"].ToString();
@@ -310,28 +308,43 @@ namespace Demo_RealTime.Hubs
                 {
                     visitor.visitorid = drd["visitorid"].ToString();
                     KF = drd["KFname"].ToString();
+                    card = drd["card"].ToString();
+                    visitor.visitor = drd["visitor"].ToString();
                 }
                 drd.Close();
-                string selectKF = "select * from users where username='"+KF+"'";
-                SqlDataReader drKF=SqlHelper.GetReader(selectKF,System.Data.CommandType.Text);
-                while (drKF.Read())
+                if (visitor.visitor== "aaa")
                 {
-                    userid=drKF["userid"].ToString();
+                    if (!string.IsNullOrEmpty(KF))
+                    {
+                        string selectKF = "select * from users where username='" + KF + "'";
+                        SqlDataReader drKF = SqlHelper.GetReader(selectKF, System.Data.CommandType.Text);
+                        while (drKF.Read())
+                        {
+                            userid = drKF["userid"].ToString();
+                        }
+                        drKF.Close();
+                       
+                        Clients.Client(userid).AAA("系统", "游客已离开");
+                        Clients.Client(userid).RemoveTree(visitor.visitor);
+                        Clients.Client(userid).AddTreeLeave(visitor.visitor);
+
+                    }
                 }
-                drKF.Close();
-                Clients.Client(userid).AAA("系统", "游客已离开");
-                string sql = "update visitor set State='离线' ,EndTime='"+ DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss")+ "',KFname=''  where  Visitor=@a ";
-                            SqlParameter[] pa = {
+                else
+                {
+                    string sql = "update visitor set State='离线' ,EndTime='" + DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss") + "',KFname=''  where  Visitor=@a and DateDiff(dd,convert(datetime,StartTime,105),getdate())=0";
+                    SqlParameter[] pa = {
                                    new SqlParameter("@a","aaa"),
                                    new SqlParameter("@b",connectionID)
                              };
-                            SqlHelper.ExeSql(sql, System.Data.CommandType.Text, pa);
-                            
-                        //}
-                    //}
+                    SqlHelper.ExeSql(sql, System.Data.CommandType.Text, pa);
+                }
+          
+                //}
+                //}
 
-                    //TODO:
-                    //1、清除ConnectionId、设置客服闲置状态
+                //TODO:
+                //1、清除ConnectionId、设置客服闲置状态
                 //}
 
             }
